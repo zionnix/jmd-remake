@@ -10,8 +10,9 @@ const Footer = () => {
             <h3 className="footer__logo">Je Me Digitalise</h3>
             <p className="footer__tagline">
               Marketing digital & stratégies performantes
-              <a href="https://nico-jemedigitalise.com/" target="_blank" rel="noopener noreferrer"> jemedigitalise.be</a>
-            </p>
+             <br> <a href="https://nico-jemedigitalise.com/" target="_blank" rel="noopener noreferrer"> jemedigitalise.be</a>
+           </br> 
+           </p>
           </div>
 
           <div className="footer__links">
