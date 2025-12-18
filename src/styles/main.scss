@@ -1016,6 +1016,21 @@ h3 { font-size: clamp(1.5rem, 3vw, 2rem); }
     border-top: 1px solid $color-border;
     color: rgba(255, 255, 255, 0.5);
     font-size: 0.9rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: $spacing-md;
+    flex-wrap: wrap;
+  }
+
+  &__admin-link {
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 0.8rem;
+    transition: $transition-base;
+    
+    &:hover {
+      color: $color-highlight;
+    }
   }
 }
 

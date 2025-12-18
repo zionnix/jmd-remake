@@ -62,6 +62,7 @@ const Footer = () => {
 
         <div className="footer__bottom">
           <p>&copy; {new Date().getFullYear()} Je Me Digitalise. Tous droits réservés.</p>
+          <Link to="/admin" className="footer__admin-link">Admin</Link>
         </div>
       </div>
     </footer>
