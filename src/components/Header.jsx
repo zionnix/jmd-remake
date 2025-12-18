@@ -38,12 +38,6 @@ const Header = () => {
               </Link>
             </li>
             <li>
-              <a href="/#services" className="header__nav-link">Services</a>
-            </li>
-            <li>
-              <a href="/#portfolio" className="header__nav-link">Portfolio</a>
-            </li>
-            <li>
               <Link 
                 to="/contact" 
                 className={`header__nav-link header__nav-link--cta ${location.pathname === '/contact' ? 'active' : ''}`}
