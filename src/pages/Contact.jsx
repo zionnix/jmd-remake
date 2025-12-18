@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { useAppointments } from '../context/AppointmentsContext';
 
 const Contact = () => {
+  const { addAppointment, getUnavailableSlots, isSlotAvailable } = useAppointments();
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -14,6 +17,7 @@ const Contact = () => {
   });
 
   const [status, setStatus] = useState('');
+  const [statusType, setStatusType] = useState(''); // 'success' ou 'error'
 
   // Horaires disponibles
   const weekdayTimes = ['17:00', '17:30', '18:00', '18:30', '19:00', '19:30'];
@@ -22,8 +26,11 @@ const Contact = () => {
   const getAvailableTimes = (date) => {
     if (!date) return [];
     const day = date.getDay();
-    // 0 = Dimanche, 6 = Samedi
-    return (day === 0 || day === 6) ? weekendTimes : weekdayTimes;
+    const baseTimes = (day === 0 || day === 6) ? weekendTimes : weekdayTimes;
+    
+    // Filtrer les créneaux déjà pris
+    const unavailableSlots = getUnavailableSlots(date);
+    return baseTimes.filter(time => !unavailableSlots.includes(time));
   };
 
   const handleInputChange = (e) => {
@@ -45,64 +52,36 @@ const Contact = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     setStatus('');
+    setStatusType('');
 
     // Validation
     if (!formData.name || !formData.email || !formData.selectedDate || !formData.selectedTime) {
       setStatus('Veuillez remplir tous les champs obligatoires.');
+      setStatusType('error');
       return;
     }
 
-    // Créer le contenu de l'email
-    const subject = `Nouvelle demande de rendez-vous - ${formData.name}`;
-    const appointmentDate = formData.selectedDate.toLocaleDateString('fr-FR', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    // Vérifier si le créneau est toujours disponible
+    if (!isSlotAvailable(formData.selectedDate, formData.selectedTime)) {
+      setStatus('Ce créneau vient d\'être réservé. Veuillez en choisir un autre.');
+      setStatusType('error');
+      setFormData(prev => ({ ...prev, selectedTime: '' }));
+      return;
+    }
+
+    // Ajouter le rendez-vous
+    addAppointment({
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      message: formData.message,
+      selectedDate: formData.selectedDate.toISOString(),
+      selectedTime: formData.selectedTime
     });
-    
-    const body = `
-Bonjour,
 
-Vous avez reçu une nouvelle demande de rendez-vous depuis le site web.
-
-━━━━━━━━━━━━━━━━━━━━━━
-📋 INFORMATIONS CLIENT
-━━━━━━━━━━━━━━━━━━━━━━
-
-Nom : ${formData.name}
-Email : ${formData.email}
-Téléphone : ${formData.phone || 'Non renseigné'}
-
-━━━━━━━━━━━━━━━━━━━━━━
-📅 RENDEZ-VOUS SOUHAITÉ
-━━━━━━━━━━━━━━━━━━━━━━
-
-Date : ${appointmentDate}
-Heure : ${formData.selectedTime}
-
-━━━━━━━━━━━━━━━━━━━━━━
-💬 MESSAGE
-━━━━━━━━━━━━━━━━━━━━━━
-
-${formData.message || 'Aucun message supplémentaire'}
-
-━━━━━━━━━━━━━━━━━━━━━━
-
-Pour répondre au client, utilisez l'adresse email : ${formData.email}
-
-Cordialement,
-Formulaire de contact - Je Me Digitalise
-    `.trim();
-
-    // Créer le lien mailto
-    const mailtoLink = `mailto:jules_benoit@outlook.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    
-    // Ouvrir le client mail
-    window.location.href = mailtoLink;
-    
     // Message de confirmation
-    setStatus('✅ Votre client email va s\'ouvrir. Envoyez l\'email pour confirmer votre demande de rendez-vous.');
+    setStatus('✅ Votre demande de rendez-vous a été envoyée ! Vous recevrez une confirmation après validation.');
+    setStatusType('success');
     
     // Reset form après 2 secondes
     setTimeout(() => {
@@ -215,24 +194,30 @@ Formulaire de contact - Je Me Digitalise
                   transition={{ duration: 0.3 }}
                 >
                   <label>Heure du rendez-vous *</label>
-                  <div className="contact__time-slots">
-                    {availableTimes.map(time => (
-                      <button
-                        key={time}
-                        type="button"
-                        className={`contact__time-slot ${formData.selectedTime === time ? 'selected' : ''}`}
-                        onClick={() => setFormData(prev => ({ ...prev, selectedTime: time }))}
-                      >
-                        {time}
-                      </button>
-                    ))}
-                  </div>
+                  {availableTimes.length > 0 ? (
+                    <div className="contact__time-slots">
+                      {availableTimes.map(time => (
+                        <button
+                          key={time}
+                          type="button"
+                          className={`contact__time-slot ${formData.selectedTime === time ? 'selected' : ''}`}
+                          onClick={() => setFormData(prev => ({ ...prev, selectedTime: time }))}
+                        >
+                          {time}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="contact__no-slots">
+                      😕 Aucun créneau disponible pour cette date. Veuillez choisir une autre date.
+                    </p>
+                  )}
                 </motion.div>
               )}
 
               {status && (
                 <motion.div
-                  className={`contact__status ${status.includes('✅') ? 'success' : 'error'}`}
+                  className={`contact__status ${statusType}`}
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
