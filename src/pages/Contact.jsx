@@ -23,14 +23,19 @@ const Contact = () => {
   const weekdayTimes = ['17:00', '17:30', '18:00', '18:30', '19:00', '19:30'];
   const weekendTimes = ['10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00'];
 
-  const getAvailableTimes = (date) => {
+  const getTimesWithAvailability = (date) => {
     if (!date) return [];
     const day = date.getDay();
     const baseTimes = (day === 0 || day === 6) ? weekendTimes : weekdayTimes;
     
-    // Filtrer les créneaux déjà pris
+    // Récupérer les créneaux déjà pris
     const unavailableSlots = getUnavailableSlots(date);
-    return baseTimes.filter(time => !unavailableSlots.includes(time));
+    
+    // Retourner tous les créneaux avec leur statut de disponibilité
+    return baseTimes.map(time => ({
+      time,
+      available: !unavailableSlots.includes(time)
+    }));
   };
 
   const handleInputChange = (e) => {
@@ -96,7 +101,8 @@ const Contact = () => {
     }, 2000);
   };
 
-  const availableTimes = getAvailableTimes(formData.selectedDate);
+  const timeSlotsWithAvailability = getTimesWithAvailability(formData.selectedDate);
+  const hasAvailableSlots = timeSlotsWithAvailability.some(slot => slot.available);
 
   return (
     <div className="contact">
@@ -194,22 +200,30 @@ const Contact = () => {
                   transition={{ duration: 0.3 }}
                 >
                   <label>Heure du rendez-vous *</label>
-                  {availableTimes.length > 0 ? (
+                  {timeSlotsWithAvailability.length > 0 ? (
                     <div className="contact__time-slots">
-                      {availableTimes.map(time => (
+                      {timeSlotsWithAvailability.map(({ time, available }) => (
                         <button
                           key={time}
                           type="button"
-                          className={`contact__time-slot ${formData.selectedTime === time ? 'selected' : ''}`}
-                          onClick={() => setFormData(prev => ({ ...prev, selectedTime: time }))}
+                          className={`contact__time-slot ${formData.selectedTime === time ? 'selected' : ''} ${!available ? 'disabled' : ''}`}
+                          onClick={() => available && setFormData(prev => ({ ...prev, selectedTime: time }))}
+                          disabled={!available}
+                          title={!available ? 'Ce créneau est déjà réservé' : ''}
                         >
                           {time}
+                          {!available && <span className="contact__time-slot-badge">Réservé</span>}
                         </button>
                       ))}
                     </div>
                   ) : (
                     <p className="contact__no-slots">
                       😕 Aucun créneau disponible pour cette date. Veuillez choisir une autre date.
+                    </p>
+                  )}
+                  {!hasAvailableSlots && timeSlotsWithAvailability.length > 0 && (
+                    <p className="contact__no-slots">
+                      😕 Tous les créneaux sont réservés pour cette date. Veuillez choisir une autre date.
                     </p>
                   )}
                 </motion.div>

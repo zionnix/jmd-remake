@@ -781,8 +781,10 @@ h3 { font-size: clamp(1.5rem, 3vw, 2rem); }
     border-radius: $border-radius-sm;
     color: $color-text;
     transition: $transition-base;
+    position: relative;
+    cursor: pointer;
 
-    &:hover {
+    &:hover:not(.disabled) {
       border-color: $color-highlight;
     }
 
@@ -791,6 +793,29 @@ h3 { font-size: clamp(1.5rem, 3vw, 2rem); }
       border-color: $color-highlight;
       color: white;
     }
+
+    &.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: rgba(100, 100, 100, 0.3);
+      border-color: rgba(100, 100, 100, 0.5);
+      color: rgba(255, 255, 255, 0.4);
+      text-decoration: line-through;
+
+      &:hover {
+        border-color: rgba(100, 100, 100, 0.5);
+      }
+    }
+  }
+
+  &__time-slot-badge {
+    display: block;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+    margin-top: 2px;
   }
 
   &__status {
