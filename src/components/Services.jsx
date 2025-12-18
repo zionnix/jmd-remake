@@ -22,6 +22,16 @@ const servicesData = [
     icon: '💡',
     title: 'Stratégie Marketing',
     description: 'Audit, conseil et accompagnement personnalisé pour développer votre présence en ligne et atteindre vos objectifs.'
+  },
+  {
+    icon: '🎬',
+    title: 'Montage Vidéo / Photo',
+    description: 'Création de contenus visuels impactants adaptés aux publicités digitales pour maximiser l\'engagement et la conversion sur vos campagnes publicitaires.'
+  },
+  {
+    icon: '✍️',
+    title: 'Copywriting',
+    description: 'Rédaction de textes publicitaires percutants pour capter l\'attention, convaincre et inciter votre audience à passer à l\'action peu importe votre objectif publicitaire.'
   }
 ];
 
